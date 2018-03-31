@@ -12,7 +12,7 @@ public class Parser {
 
 	// MARK: - Types
 
-	public typealias Callback = (scope: String, range: NSRange) -> Void
+	public typealias Callback = (/* scope: */ String, /* range: */ NSRange) -> Void
 
 
 	// MARK: - Properties
@@ -29,16 +29,16 @@ public class Parser {
 
 	// MARK: - Parsing
 
-	public func parse(string: String, match callback: Callback) {
+	public func parse(_ string: String, match callback: Callback) {
 		// Loop through paragraphs
-		let s: NSString = string
+		let s = string as NSString
 		let length = s.length
 		var paragraphEnd = 0
 
 		while paragraphEnd < length {
 			var paragraphStart = 0
 			var contentsEnd = 0
-			s.getParagraphStart(&paragraphStart, end: &paragraphEnd, contentsEnd: &contentsEnd, forRange: NSMakeRange(paragraphEnd, 0))
+            s.getParagraphStart(&paragraphStart, end: &paragraphEnd, contentsEnd: &contentsEnd, for: NSMakeRange(paragraphEnd, 0))
 
 			let paragraphRange = NSMakeRange(paragraphStart, contentsEnd - paragraphStart)
 			let limit = NSMaxRange(paragraphRange)
@@ -46,7 +46,7 @@ public class Parser {
 
 			// Loop through the line until we reach the end
 			while range.length > 0 && range.location < limit {
-				let location = parse(string, inRange: range, callback: callback)
+                let location = parse(string, inRange: range, callback: callback)
 				range.location = Int(location)
 				range.length = max(0, range.length - paragraphRange.location - range.location)
 			}
@@ -57,7 +57,8 @@ public class Parser {
 	// MARK: - Private
 
 	/// Returns new location
-	private func parse(string: String, inRange bounds: NSRange, callback: Callback) -> UInt {
+
+	private func parse(_ string: String, inRange bounds: NSRange, callback: Callback) -> UInt {
 		for pattern in language.patterns {
 			// Single pattern
 			if let match = pattern.match {
@@ -69,15 +70,15 @@ public class Parser {
 			}
 
 			// Begin & end
-			if let begin = pattern.begin, end = pattern.end {
+			if let begin = pattern.begin, let end = pattern.end {
 				guard let beginResults = parse(string, inRange: bounds, expression: begin, captures: pattern.beginCaptures),
-					beginRange = beginResults.range else { continue }
+					let beginRange = beginResults.range else { continue }
 
 				let location = NSMaxRange(beginRange)
 				let endBounds = NSMakeRange(location, NSMaxRange(bounds) - location)
 
 				guard let endResults = parse(string, inRange: endBounds, expression: end, captures: pattern.endCaptures),
-					endRange = endResults.range else { /* TODO: Rewind? */ continue }
+					let endRange = endResults.range else { /* TODO: Rewind? */ continue }
 
 				// Add whole scope before start and end
 				var results = ResultSet()
@@ -96,11 +97,11 @@ public class Parser {
 	}
 
 	/// Parse an expression with captures
-	private func parse(string: String, inRange bounds: NSRange, scope: String? = nil, expression expressionString: String, captures: CaptureCollection?) -> ResultSet? {
+	private func parse(_ string: String, inRange bounds: NSRange, scope: String? = nil, expression expressionString: String, captures: CaptureCollection?) -> ResultSet? {
 		let matches: [NSTextCheckingResult]
 		do {
-			let expression = try NSRegularExpression(pattern: expressionString, options: [.CaseInsensitive])
-			matches = expression.matchesInString(string, options: [], range: bounds)
+			let expression = try NSRegularExpression(pattern: expressionString, options: [.caseInsensitive])
+			matches = expression.matches(in: string, options: [], range: bounds)
 		} catch {
 			return nil
 		}
@@ -108,19 +109,19 @@ public class Parser {
 		guard let result = matches.first else { return nil }
 
 		var resultSet = ResultSet()
-		if let scope = scope where result.range.location != NSNotFound {
-			resultSet.addResult(Result(scope: scope, range: result.range))
+		if let scope = scope, result.range.location != NSNotFound {
+            resultSet.addResult(Result(scope: scope, range: result.range))
 		}
 
 		if let captures = captures {
 			for index in captures.captureIndexes {
-				let range = result.rangeAtIndex(Int(index))
+                let range = result.range(at: Int(index))
 				if range.location == NSNotFound {
 					continue
 				}
 
 				if let scope = captures[index]?.name {
-					resultSet.addResult(Result(scope: scope, range: range))
+                    resultSet.addResult(Result(scope: scope, range: range))
 				}
 			}
 		}
@@ -132,10 +133,10 @@ public class Parser {
 		return nil
 	}
 
-	private func applyResults(resultSet: ResultSet, callback: Callback) -> UInt {
+	private func applyResults(_ resultSet: ResultSet, callback: Callback) -> UInt {
 		var i = 0
 		for result in resultSet.results {
-			callback(scope: result.scope, range: result.range)
+            callback(result.scope, result.range)
 			i = max(NSMaxRange(result.range), i)
 		}
 		return UInt(i)

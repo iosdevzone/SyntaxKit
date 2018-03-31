@@ -13,7 +13,7 @@ import X
 	import UIKit
 #endif
 
-public typealias Attributes = [String: AnyObject]
+public typealias Attributes = [NSAttributedStringKey: AnyObject]
 
 public struct Theme {
 
@@ -26,10 +26,10 @@ public struct Theme {
 
 	// MARK: - Initializers
 
-	public init?(dictionary: [NSObject: AnyObject]) {
+	public init?(dictionary: [String: AnyObject]) {
 		guard let UUID = dictionary["uuid"] as? String,
-			name = dictionary["name"] as? String,
-			rawSettings = dictionary["settings"] as? [[String: AnyObject]]
+			let name = dictionary["name"] as? String,
+			let rawSettings = dictionary["settings"] as? [[String: AnyObject]]
 			else { return nil }
 
 		self.UUID = UUID
@@ -40,19 +40,25 @@ public struct Theme {
 			guard let scopes = raw["scope"] as? String else { continue }
 			guard var setting = raw["settings"] as? [String: AnyObject] else { continue }
 
-			if let value = setting.removeValueForKey("foreground") as? String {
-				setting[NSForegroundColorAttributeName] = Color(hex: value)
+            
+            if let value = setting.removeValue(forKey: "foreground") as? String {
+				setting[NSAttributedStringKey.foregroundColor.rawValue] = Color(hex: value)
 			}
 
-			if let value = setting.removeValueForKey("background") as? String {
-				setting[NSBackgroundColorAttributeName] = Color(hex: value)
+            if let value = setting.removeValue(forKey: "background") as? String {
+				
+                setting[NSAttributedStringKey.backgroundColor.rawValue] = Color(hex: value)
 			}
 
 			// TODO: caret, invisibles, lightHighlight, selection, font style
-
-			for scope in scopes.componentsSeparatedByString(",") {
-				let key = scope.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-				attributes[key] = setting
+            var attrs = Attributes()
+            for (k,v) in setting {
+                attrs[NSAttributedStringKey(k)] = v
+            }
+            
+            for scope in scopes.components(separatedBy: ",") {
+                let key = scope.trimmingCharacters(in: NSCharacterSet.whitespacesAndNewlines)
+				attributes[key] = attrs
 			}
 		}
 		self.attributes = attributes

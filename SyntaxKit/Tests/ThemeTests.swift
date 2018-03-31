@@ -14,14 +14,17 @@ class ThemeTests: XCTestCase {
 
 	// MARK: - Properties
 
-	let tomorrow = theme("Tomorrow")
+    let tomorrow = theme(name: "Tomorrow")
 
 
 	// MARK: - Tests
 
 	func testLoading() {
-		XCTAssertEqual("82CCD69C-F1B1-4529-B39E-780F91F07604", tomorrow.UUID)
-		XCTAssertEqual("Tomorrow", tomorrow.name)
-		assertEqualColors(Color(hex: "#666969")!, tomorrow.attributes["constant.other"]![NSForegroundColorAttributeName] as! Color)
+		XCTAssertEqual("82CCD69C-F1B1-4529-B39E-780F91F07604", tomorrow!.UUID)
+		XCTAssertEqual("Tomorrow", tomorrow!.name)
+        let attrs = tomorrow!.attributes["constant.other"]!
+        assertEqualColors(color1: Color(hex: "#666969")!,
+                          attrs[NSAttributedStringKey.foregroundColor] as! Color)
+      
 	}
 }

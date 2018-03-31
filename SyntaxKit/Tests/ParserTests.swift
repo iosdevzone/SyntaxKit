@@ -13,7 +13,7 @@ class ParserTests: XCTestCase {
 
 	// MARK: - Properties
 
-	let parser = Parser(language: language("YAML"))
+    let parser = Parser(language: language(name: "YAML"))
 
 
 	// MARK: - Tests
@@ -23,7 +23,7 @@ class ParserTests: XCTestCase {
 		var punctuationBegin: NSRange?
 		var punctuationEnd: NSRange?
 
-		parser.parse("title: \"Hello World\"\n") { scope, range in
+        parser.parse("title: \"Hello World\"\n") { scope, range in
 			if stringQuoted == nil && scope.hasPrefix("string.quoted.double") {
 				stringQuoted = range
 			}
@@ -45,7 +45,7 @@ class ParserTests: XCTestCase {
 	func testParsingBeginEndCrap() {
 		var stringQuoted: NSRange?
 
-		parser.parse("title: Hello World\ncomments: 24\nposts: \"12\"zz\n") { scope, range in
+        parser.parse("title: Hello World\ncomments: 24\nposts: \"12\"zz\n") { scope, range in
 			if stringQuoted == nil && scope.hasPrefix("string.quoted.double") {
 				stringQuoted = range
 			}
@@ -57,12 +57,12 @@ class ParserTests: XCTestCase {
 	func testRuby() {
 		let parser = Parser(language: language("Ruby"))
 		let input = fixture("test.rb", "txt")
-		parser.parse(input, match: { _, _ in return })
+        parser.parse(input!, match: { _, _ in return })
 	}
     
     func testJavaScript() {
         let parser = Parser(language: language("JavaScript"))
         let input = fixture("test.js", "txt")
-        parser.parse(input, match: { _, _ in return })
+        parser.parse(input!, match: { _, _ in return })
     }
 }

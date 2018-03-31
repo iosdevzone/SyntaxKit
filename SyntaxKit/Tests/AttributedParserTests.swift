@@ -19,11 +19,11 @@ class AttributedParserTests: XCTestCase {
 	// MARK: - Tests
 
 	func testParsing() {
-		let string = parser.attributedStringForString("title: Hello World\ncount: 42\n")
+        let string = parser.attributedStringForString(string: "title: Hello World\ncount: 42\n")
 
-		XCTAssertEqual(["color": "blue"] as NSDictionary, string.attributesAtIndex(0, effectiveRange: nil) as NSDictionary)
-		XCTAssertEqual(["color": "red"] as NSDictionary, string.attributesAtIndex(7, effectiveRange: nil) as NSDictionary)
-		XCTAssertEqual(["color": "blue"] as NSDictionary, string.attributesAtIndex(19, effectiveRange: nil) as NSDictionary)
-		XCTAssertEqual(["color": "purple"] as NSDictionary, string.attributesAtIndex(25, effectiveRange: nil) as NSDictionary)
+        XCTAssertEqual(["color": "blue"] as NSDictionary, string.attributes(at: 0, effectiveRange: nil) as NSDictionary)
+        XCTAssertEqual(["color": "red"] as NSDictionary, string.attributes(at: 7, effectiveRange: nil) as NSDictionary)
+        XCTAssertEqual(["color": "blue"] as NSDictionary, string.attributes(at: 19, effectiveRange: nil) as NSDictionary)
+        XCTAssertEqual(["color": "purple"] as NSDictionary, string.attributes(at: 25, effectiveRange: nil) as NSDictionary)
 	}
 }
