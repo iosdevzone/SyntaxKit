@@ -26,7 +26,7 @@ struct ResultSet {
 
 	// MARK: - Adding
 
-	mutating func addResult(result: Result) {
+	mutating func addResult(_ result: Result) {
 		_results.append(result)
 
 		guard let range = range else {
@@ -37,7 +37,7 @@ struct ResultSet {
 		self.range = NSUnionRange(range, result.range)
 	}
 
-	mutating func addResults(resultSet: ResultSet) {
+	mutating func addResults(_ resultSet: ResultSet) {
 		for result in resultSet.results {
 			addResult(result)
 		}
